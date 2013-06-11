@@ -33,10 +33,10 @@ link_directories(
   ${STATEFS_LIBRARY_DIRS}
 )
 
-add_subdirectory(src)
-add_subdirectory(tests)
-
 if(${USEQT} STREQUAL "5")
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include/contextsubscriber)
 install(FILES include/contextsubscriber/contextproperty.h DESTINATION include)
 endif(${USEQT} STREQUAL "5")
+
+add_subdirectory(src)
+add_subdirectory(tests)
