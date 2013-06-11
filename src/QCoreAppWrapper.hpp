@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QThread>
 #include <QCoreApplication>
+#include <QMutex>
+#include <QWaitCondition>
 
 class QCoreAppWrapper : public QThread
 {
@@ -17,6 +19,9 @@ private:
     static int argc_;
     static char* argv_[];
     static QCoreApplication *app_;
+
+    static QMutex mutex_;
+    static QWaitCondition start_cond_;
 
 private slots:
     //void OnExec();
