@@ -35,7 +35,7 @@ Contextkit property interface using statefs instead of contextkit
 %package subscriber-qt4-devel
 Summary: Contextkit property interface using statefs
 Group: System Environment/Libraries
-Requires: statefs-contexkit-subscriber-qt4
+Requires: statefs-contextkit-subscriber-qt4
 %description subscriber-qt4-devel
 Contextkit property interface using statefs instead of contextkit
 
