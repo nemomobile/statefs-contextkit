@@ -97,10 +97,8 @@ private:
 plugin_ptr SharedObjFactory::plugin_get(QString const &name)
 {
     // TODO hard-coded path
-    static const QString plugins_path
-        = "/usr/lib/contextkit/subscriber-plugins/";
-
-    auto path = plugins_path + name + ".so";
+    QString path("/usr/lib/contextkit/subscriber-plugins/");
+    path += (name + ".so");
     plugin_ptr lib(new QLibrary(path));
     lib->load();
     if (!lib->isLoaded())
@@ -200,7 +198,7 @@ static bool read_plugin_info(QFileInfo const &fileInfo, plugin_properties_type &
     QString fileName(fileInfo.canonicalFilePath());
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)){
-        qDebug() << "No file";
+        std::cerr << "No file";
         return false;
     }
 
@@ -258,7 +256,7 @@ static bool read_plugin_info(QFileInfo const &fileInfo, plugin_properties_type &
 static void build_tree(info_tree_type &infoTree)
 {
     // NB! path is hardcoded
-    static const QString info_path("/usr/share/contextkit/providers");
+    QString info_path("/usr/share/contextkit/providers");
     plugin_properties_type plugins_info;
     QStringList filters({"*.context"});
     QDir info_dir(info_path);
@@ -713,10 +711,6 @@ static struct statefs_provider provider = {
 static bool is_loaded = false;
 static void load_info()
 {
-    if (is_loaded)
-        return;
-
-    qt_app.reset(new QtBridge());
     info_tree_type info_tree;
     build_tree(info_tree);
 
@@ -736,6 +730,11 @@ static void load_info()
 
 EXTERN_C struct statefs_provider * statefs_provider_get(void)
 {
-    load_info();
+    if (is_loaded)
+        return &provider;
+
+    qt_app.reset(new QtBridge());
+    qt_app->execute(&load_info);
+
     return &provider;
 }
