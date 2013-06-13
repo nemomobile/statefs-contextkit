@@ -79,7 +79,6 @@ typedef std::shared_ptr<ProviderThread> bridge_ptr;
 
 class QtBridge : public QCoreAppWrapper
 {
-    Q_OBJECT
 public:
     bridge_ptr bridge_get(provider_factory_ptr factory);
 private:
