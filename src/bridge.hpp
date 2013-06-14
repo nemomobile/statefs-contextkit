@@ -10,7 +10,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QEvent>
-#include "QCoreAppWrapper.hpp"
+#include "wrapqt.hpp"
 
 #include <memory>
 
@@ -77,7 +77,7 @@ private:
 
 typedef std::shared_ptr<ProviderThread> bridge_ptr;
 
-class QtBridge : public QCoreAppWrapper
+class QtBridge : public wrapqt::CoreAppContainer
 {
 public:
     bridge_ptr bridge_get(provider_factory_ptr factory);

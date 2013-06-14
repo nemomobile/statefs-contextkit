@@ -7,6 +7,9 @@
 #include <chrono>
 #include <thread>
 
+namespace wrapqt
+{
+
 class CoreAppImpl : public QCoreApplication
 {
     Q_OBJECT;
@@ -59,11 +62,11 @@ private:
     std::function<void()> fn_;
 };
 
-class QCoreAppWrapper
+class CoreAppContainer
 {
 public:
-    QCoreAppWrapper();
-    virtual ~QCoreAppWrapper();
+    CoreAppContainer();
+    virtual ~CoreAppContainer();
 
     void execute(std::function<void()> const&);
 private:
@@ -75,5 +78,7 @@ private:
     std::thread thread_;
     CoreAppImpl *app_;
 };
+
+}
  
 #endif // _QCOREAPWRAPPER_HPP_

@@ -1,10 +1,13 @@
-#include "QCoreAppWrapper.hpp"
+#include "wrapqt.hpp"
 #include <QTimer>
 #include <QDebug>
 #include <stdexcept>
 
-int QCoreAppWrapper::argc_ = 0;
-char* QCoreAppWrapper::argv_[] = {nullptr};
+namespace wrapqt
+{
+
+int CoreAppContainer::argc_ = 0;
+char* CoreAppContainer::argv_[] = {nullptr};
 
 CoreAppCondNotify::CoreAppCondNotify
 (std::unique_lock<std::mutex> &lock, std::condition_variable &cond)
@@ -16,7 +19,7 @@ void CoreAppCondNotify::started()
     lock_.unlock();
 }
 
-QCoreAppWrapper::QCoreAppWrapper()
+CoreAppContainer::CoreAppContainer()
     : thread_([this]() {
             std::unique_lock<std::mutex> lock(mutex_);
             app_ = new CoreAppImpl(argc_, argv_);
@@ -29,14 +32,14 @@ QCoreAppWrapper::QCoreAppWrapper()
     started_.wait_for(lock,  std::chrono::milliseconds(10000));
 }
 
-QCoreAppWrapper::~QCoreAppWrapper() {
+CoreAppContainer::~CoreAppContainer() {
     if (app_) {
         app_->quit();
     }
     thread_.join();
 }
 
-void QCoreAppWrapper::execute(std::function<void()> const& fn)
+void CoreAppContainer::execute(std::function<void()> const& fn)
 {
     CoreAppExecEvent e(fn);
     app_->sendEvent(app_, &e);
@@ -69,4 +72,6 @@ CoreAppEvent::CoreAppEvent(Type t)
 void CoreAppExecEvent::execute() const
 {
     fn_();
+}
+
 }

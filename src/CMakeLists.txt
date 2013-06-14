@@ -35,8 +35,8 @@ link_directories(
   ${CONTEXTPROVIDER_LIBRARY_DIRS}
 )
 
-set(SRC bridge.cpp util.cpp QCoreAppWrapper.cpp provider.cpp)
-set(HDRS bridge.hpp QCoreAppWrapper.hpp)
+set(SRC bridge.cpp util.cpp wrapqt.cpp provider.cpp)
+set(HDRS bridge.hpp wrapqt.hpp)
 qt4_wrap_cpp(BRIDGE_MOC_SRC ${HDRS})
 
 add_library(statefs-provider-contextkit
