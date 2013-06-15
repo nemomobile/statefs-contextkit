@@ -72,19 +72,16 @@ statefs_branch Namespace::branch_template = {
         &Namespace::child_release
 };
 
-
-Property::node_type Property::* Property::prop_offset = &Property::prop_;
-
 Property *Property::self_cast(statefs_property *p)
 {
     auto n = static_cast<node_type*>(p);
-    return container_of(n, Property, prop_);
+    return cor::member_container(n, &Property::prop_);
 }
 
 Property const* Property::self_cast(statefs_property const *p)
 {
     auto n = static_cast<node_type const*>(p);
-    return container_of(n, Property, prop_);
+    return cor::member_container(n, &Property::prop_);
 }
 
 statefs_node Property::node_template = {

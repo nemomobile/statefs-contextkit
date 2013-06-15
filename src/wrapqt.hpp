@@ -1,14 +1,16 @@
 #ifndef _QCOREAPWRAPPER_HPP_
 #define _QCOREAPWRAPPER_HPP_
 
+#include "events.hpp"
+
 #include <QObject>
 #include <QCoreApplication>
 
+#include <memory>
 #include <chrono>
 #include <thread>
 
-namespace wrapqt
-{
+namespace cor { namespace qt {
 
 class CoreAppImpl : public QCoreApplication
 {
@@ -26,41 +28,14 @@ class CoreAppCondNotify : public QObject
     Q_OBJECT;
 public:
     CoreAppCondNotify(std::unique_lock<std::mutex> &lock
-                            , std::condition_variable &cond);
+                      , std::condition_variable &cond);
 private slots:
-    void started();
+    void notify();
 private:
     std::unique_lock<std::mutex> &lock_;
     std::condition_variable &cond_;
 };
 
-class CoreAppEvent : public QEvent
-{
-public:
-    enum Type {
-        Execute = QEvent::User
-    };
-
-    virtual ~CoreAppEvent() {}
-
-protected:
-    CoreAppEvent(Type t);
-private:
-    CoreAppEvent();
-};
-
-class CoreAppExecEvent : public CoreAppEvent
-{
-public:
-    CoreAppExecEvent(std::function<void()> const& fn)
-        : CoreAppEvent(CoreAppEvent::Execute)
-        , fn_(fn)
-    {
-    }
-    void execute() const;
-private:
-    std::function<void()> fn_;
-};
 
 class CoreAppContainer
 {
@@ -76,9 +51,9 @@ private:
     std::mutex mutex_;
     std::condition_variable started_;
     std::thread thread_;
-    CoreAppImpl *app_;
+    std::unique_ptr<CoreAppImpl> app_;
 };
 
-}
+}}
  
 #endif // _QCOREAPWRAPPER_HPP_

@@ -8,7 +8,7 @@ URL: http://github.com/nemomobile/statefs-contextkit
 Source0: %{name}-%{version}.tar.bz2
 BuildRequires: pkgconfig(statefs) >= 0.2.14
 BuildRequires: cmake >= 2.8
-BuildRequires: pkgconfig(cor) >= 0.1.3
+BuildRequires: pkgconfig(cor) >= 0.1.4
 BuildRequires: pkgconfig(QtCore)
 BuildRequires: pkgconfig(QtXml)
 BuildRequires: contextkit-devel
@@ -55,7 +55,8 @@ rm -rf %{buildroot}
 
 %files provider
 %defattr(-,root,root,-)
-%{_libdir}/libstatefs-provider-contextkit.so
+%{_libdir}/statefs/libprovider-contextkit.so
+%{_libdir}/statefs/libprovider-qt4.so
 
 %files subscriber-qt4
 %defattr(-,root,root,-)
@@ -66,4 +67,4 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/contextkit-statefs-qt4.pc
 
 %post provider
-statefs register %{_libdir}/libstatefs-provider-contextkit.so
+statefs register %{_libdir}/statefs/libprovider-qt4.so

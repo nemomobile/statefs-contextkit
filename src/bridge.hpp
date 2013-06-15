@@ -10,7 +10,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QEvent>
-#include "wrapqt.hpp"
+#include "events.hpp"
 
 #include <memory>
 
@@ -34,6 +34,9 @@ public:
 
     virtual bool event(QEvent *);
 
+    void subscribe(QString name, CKitProperty *dst);
+    void unsubscribe(QString name);
+
 private slots:
     void onValue(QString, QVariant);
     void onSubscribed(QString);
@@ -41,15 +44,12 @@ private slots:
     void onSubscribeFailed(QString, QString);
 
 private:
-    void subscribe(QString const &name, CKitProperty *dst);
-    void unsubscribe(QString const &name);
 
     provider_ptr provider();
 
     provider_factory_ptr factory_;
     provider_ptr provider_;
     std::map<QString, CKitProperty *> subscribers_;
-    QThread *thread_;
     std::map<QString, QVariant> cache_;
 };
 
@@ -69,60 +69,20 @@ public:
 private:
     void run();
 
-    ProviderBridge* bridge_;
     provider_factory_ptr factory_;
     QMutex mutex_;
     QWaitCondition cond_;
+    std::unique_ptr<ProviderBridge> bridge_;
 };
 
 typedef std::shared_ptr<ProviderThread> bridge_ptr;
 
-class QtBridge : public wrapqt::CoreAppContainer
+class QtBridge
 {
 public:
     bridge_ptr bridge_get(provider_factory_ptr factory);
 private:
     std::map<QString, bridge_ptr> bridges;
-};
-
-class ProviderEvent : public QEvent
-{
-public:
-    enum Type {
-        Subscribe = QEvent::User,
-        Unsubscribe
-    };
-
-    virtual ~ProviderEvent() {}
-
-protected:
-    ProviderEvent(Type t)
-    : QEvent(static_cast<QEvent::Type>(t))
-    {}
-private:
-    ProviderEvent();
-};
-
-class ProviderSubscribe : public ProviderEvent
-{
-public:
-    ProviderSubscribe(QString const &name, CKitProperty *dst)
-        : ProviderEvent(ProviderEvent::Subscribe)
-        , name_(name), dst_(dst)
-    {}
-
-    QString name_;
-    CKitProperty *dst_;
-};
-
-class ProviderUnsubscribe : public ProviderEvent
-{
-public:
-    ProviderUnsubscribe(QString const &name)
-        : ProviderEvent(ProviderEvent::Unsubscribe), name_(name)
-    {}
-
-    QString name_;
 };
 
 #endif // _STATEFS_CKIT_BRIDGE_HPP_

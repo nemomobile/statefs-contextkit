@@ -1,6 +1,8 @@
 #include "util.hpp"
 #include "bridge.hpp"
 
+#include <cor/mt.hpp>
+
 #include "provider.hpp"
 #include <statefs/util.h>
 
@@ -14,6 +16,7 @@
 #include <QDir>
 #include <QLibrary>
 #include <QSharedPointer>
+#include <QCoreApplication>
 
 #include <memory>
 #include <map>
@@ -296,9 +299,9 @@ public:
         v_ = cKitValueEncode(v);
         if (is_first_access_) {
             std::lock_guard<std::mutex> lock(mutex_);
-            if (is_first_access_) {
+            if (is_first_access_)
                 initialized_.notify_all();
-            }
+
             is_first_access_ = false;
         }
 
@@ -332,11 +335,16 @@ public:
     {
         // if value is read w/o preceeding polling there is no way to
         // read it until provider notify about it, so waiting for
-        // notification a bit but only on first access
+        // notification supplying data a bit but only on first access,
+        // cached value will be used on consequent access (this is not
+        // correct because cached value can be outdated but it should
+        // descrease access time) TODO but this logic should be
+        // changed if statefs contextkit provider will be alive for
+        // too long time :)
         if (is_first_access_) {
             std::unique_lock<std::mutex> lock(mutex_);
             if (is_first_access_) {
-                initialized_.wait_for(lock,  std::chrono::milliseconds(100)
+                initialized_.wait_for(lock,  std::chrono::milliseconds(500)
                                       , [this]() { return is_first_access_; });
                 is_first_access_ = false;
             }
@@ -346,7 +354,7 @@ public:
 
     statefs_size_t size() const
     {
-        return is_first_access_ ? 1024 : v_.size();
+        return is_first_access_ ? 1024 : std::max(256, v_.size());
     }
 
     static CKitProperty *self_cast(statefs_property*);
@@ -430,7 +438,7 @@ public:
 };
 
 ProviderBridge::ProviderBridge(provider_factory_ptr factory, ProviderThread *parent)
-    : QObject(parent), factory_(factory)
+    : factory_(factory)
 {}
 
 ProviderBridge::~ProviderBridge()
@@ -452,7 +460,7 @@ ProviderBridge::~ProviderBridge()
     }
 }
 
-void ProviderBridge::subscribe(QString const &name, CKitProperty *dst)
+void ProviderBridge::subscribe(QString name, CKitProperty *dst)
 {
     subscribers_[name] = dst;
     QSet<QString> nset;
@@ -466,7 +474,7 @@ void ProviderBridge::subscribe(QString const &name, CKitProperty *dst)
     }
 }
 
-void ProviderBridge::unsubscribe(QString const &name)
+void ProviderBridge::unsubscribe(QString name)
 {
     subscribers_.erase(name);
 
@@ -549,7 +557,7 @@ ProviderThread::~ProviderThread()
 
 void ProviderThread::run()
 {
-    bridge_ = new ProviderBridge(factory_, this);
+    bridge_.reset(new ProviderBridge(factory_, this));
     mutex_.lock();
     cond_.wakeAll();
     mutex_.unlock();
@@ -559,27 +567,35 @@ void ProviderThread::run()
 
 void ProviderThread::subscribe(QString const &name, CKitProperty *dst)
 {
-    QCoreApplication::postEvent
-        (bridge_, new ProviderSubscribe(name, dst));
+    auto fn = std::bind(std::mem_fn(&ProviderBridge::subscribe)
+                        , bridge_.get(), name, dst);
+    // do not wait until subscribed, data changing notifications are
+    // coming async and can be supplied directly from subscription
+    // code causing deadlock
+    QCoreApplication::postEvent(bridge_.get(), new cor::qt::EventExecute(fn));
 }
 
 void ProviderThread::unsubscribe(QString const &name)
 {
-    QCoreApplication::postEvent(bridge_, new ProviderUnsubscribe(name));
+    cor::Future f;
+    auto fn = std::bind(std::mem_fn(&ProviderBridge::unsubscribe)
+                        , bridge_.get(), name);
+    QCoreApplication::postEvent
+        (bridge_.get(), new cor::qt::EventExecute(f.wrap(fn)));
+    // wait until unsubcribed to avoid infinite asynchronous
+    // subscribe/unsubscribe cycles lagging behind access to file
+    if (f.wait(std::chrono::milliseconds(1000)) == std::cv_status::timeout)
+        qDebug() << "Timeout unsubscribing from " << name;
 }
 
 bool ProviderBridge::event(QEvent *e)
 {
     try {
-        switch (static_cast<ProviderEvent::Type>(e->type())) {
-        case (ProviderEvent::Subscribe): {
-            auto s = static_cast<ProviderSubscribe*>(e);
-            subscribe(s->name_, s->dst_);
-            return true;
-        }
-        case (ProviderEvent::Unsubscribe): {
-            auto s = static_cast<ProviderUnsubscribe*>(e);
-            unsubscribe(s->name_);
+        using namespace cor::qt;
+        switch (static_cast<Event::Type>(e->type())) {
+        case (Event::Execute): {
+            auto s = static_cast<EventExecute*>(e);
+            s->execute();
             return true;
         }
         default:
@@ -675,8 +691,7 @@ EXTERN_C void ckit_close(statefs_handle_t h)
 EXTERN_C void ckit_release(struct statefs_node *node)
 {
     namespaces.clear();
-    //info_tree.clear();
-    //qt_app.reset(nullptr);
+    qt_app.reset(nullptr);
 }
 
 static struct statefs_provider provider = {
@@ -734,7 +749,7 @@ EXTERN_C struct statefs_provider * statefs_provider_get(void)
         return &provider;
 
     qt_app.reset(new QtBridge());
-    qt_app->execute(&load_info);
+    load_info();
 
     return &provider;
 }

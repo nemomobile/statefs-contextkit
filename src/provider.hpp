@@ -63,11 +63,11 @@ private:
 
     static statefs_node * child_find(statefs_branch const*, char const *);
 
-    static statefs_node * child_get(statefs_branch const*, intptr_t);
+    static statefs_node * child_get(statefs_branch const*, statefs_handle_t);
 
-    static intptr_t child_first(statefs_branch const*);
-    static void child_next(statefs_branch const*, intptr_t *);
-    static bool child_release(statefs_branch const*, intptr_t);
+    static statefs_handle_t child_first(statefs_branch const*);
+    static void child_next(statefs_branch const*, statefs_handle_t *);
+    static bool child_release(statefs_branch const*, statefs_handle_t);
 
     static Namespace const *self_cast(statefs_branch const* branch);
 
@@ -130,7 +130,6 @@ public:
 
 protected:
     node_type prop_;
-    static node_type Property::* prop_offset;
 };
 
 } // namespace
