@@ -344,7 +344,7 @@ public:
         return v_;
     }
 
-    size_t size() const
+    statefs_size_t size() const
     {
         return is_first_access_ ? 1024 : v_.size();
     }
@@ -391,7 +391,7 @@ public:
         prop_->disconnect();
     }
 
-    int read(char *dst, size_t len, off_t off)
+    int read(char *dst, statefs_size_t len, statefs_off_t off)
     {
         if (!len)
             return 0;
@@ -593,7 +593,7 @@ bool ProviderBridge::event(QEvent *e)
     return false;
 }
 
-static struct statefs_node * ns_find
+EXTERN_C struct statefs_node * ns_find
 (struct statefs_branch const* self, char const *name)
 {
     if (!name)
@@ -608,25 +608,25 @@ static struct statefs_node * ns_find
     return nullptr;
 }
 
-static struct statefs_node * ns_get
-(struct statefs_branch const* self, intptr_t idx)
+EXTERN_C struct statefs_node * ns_get
+(struct statefs_branch const* self, statefs_handle_t idx)
 {
     if ((unsigned)idx >= namespaces.size())
         return nullptr;
     return &(namespaces[idx]->node);
 }
 
-static intptr_t ns_first(struct statefs_branch const* self)
+EXTERN_C statefs_handle_t ns_first(struct statefs_branch const* self)
 {
     return 0;
 }
 
-static void ns_next(struct statefs_branch const*, intptr_t *idx_ptr)
+EXTERN_C void ns_next(struct statefs_branch const*, statefs_handle_t *idx_ptr)
 {
     ++*idx_ptr;
 }
 
-static bool ckit_connect
+EXTERN_C bool ckit_connect
 (struct statefs_property *p, struct statefs_slot *slot)
 {
     auto self = CKitProperty::self_cast(p);
@@ -634,24 +634,24 @@ static bool ckit_connect
     return false;
 }
 
-static void ckit_disconnect(struct statefs_property *p)
+EXTERN_C void ckit_disconnect(struct statefs_property *p)
 {
     auto self = CKitProperty::self_cast(p);
     self->disconnect();
 }
 
-static int ckit_getattr(struct statefs_property const* p)
+EXTERN_C int ckit_getattr(struct statefs_property const* p)
 {
     return STATEFS_ATTR_READ | STATEFS_ATTR_DISCRETE;
 }
 
-static ssize_t ckit_size(struct statefs_property const* p)
+EXTERN_C statefs_ssize_t ckit_size(struct statefs_property const* p)
 {
     auto self = CKitProperty::self_cast(p);
     return self->size();
 }
 
-static intptr_t ckit_open(struct statefs_property *p, int mode)
+EXTERN_C statefs_handle_t ckit_open(struct statefs_property *p, int mode)
 {
     if (mode & O_WRONLY) {
         errno = EINVAL;
@@ -661,18 +661,18 @@ static intptr_t ckit_open(struct statefs_property *p, int mode)
     return cor::new_tagged_handle<PropHandle>(self);
 }
 
-static int ckit_read(intptr_t h, char *dst, size_t len, off_t off)
+EXTERN_C int ckit_read(statefs_handle_t h, char *dst, statefs_size_t len, statefs_off_t off)
 {
     auto p = cor::tagged_handle_pointer<PropHandle>(h);
     return (p) ? p->read(dst, len, off) : 0;
 }
 
-static void ckit_close(intptr_t h)
+EXTERN_C void ckit_close(statefs_handle_t h)
 {
     cor::delete_tagged_handle<PropHandle>(h);
 }
 
-static void ckit_release(struct statefs_node *node)
+EXTERN_C void ckit_release(struct statefs_node *node)
 {
     namespaces.clear();
     //info_tree.clear();
