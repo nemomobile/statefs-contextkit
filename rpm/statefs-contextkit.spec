@@ -67,4 +67,4 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/contextkit-statefs-qt4.pc
 
 %post provider
-statefs register %{_libdir}/statefs/libprovider-qt4.so
+statefs register %{_libdir}/statefs/libprovider-qt4.so || :
