@@ -203,7 +203,7 @@ void ContextPropertyPrivate::subscribe() const
 
     is_subscribed_ = true;
     if (!tryOpen())
-        trySubscribe();
+        return reopen_timer_->start(reopen_interval_);
 
     notifier_.reset(new QSocketNotifier(file_.handle(), QSocketNotifier::Read));
     connect(notifier_.data(), SIGNAL(activated(int))
