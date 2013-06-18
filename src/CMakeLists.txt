@@ -4,12 +4,14 @@ find_package(Qt4 4.7.0 REQUIRED)
 include(${QT_USE_FILE})
 add_definitions(-DQT_SHARED)
 include_directories(${QT_INCLUDE_DIR})
+configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
 
 elseif(${USEQT} STREQUAL "5")
 
 find_package(Qt5Core REQUIRED)
 include_directories(${Qt5Core_INCLUDE_DIRS})
 add_definitions(${Qt5Core_DEFINITIONS})
+configure_file(contextkit-statefs.pc.in contextkit-statefs.pc @ONLY)
 
 endif(${USEQT} STREQUAL "4")
 
