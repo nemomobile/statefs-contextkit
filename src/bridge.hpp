@@ -1,6 +1,7 @@
 #ifndef _STATEFS_CKIT_BRIDGE_HPP_
 #define _STATEFS_CKIT_BRIDGE_HPP_
 
+#include <cor/inotify.hpp>
 #include <iproviderplugin.h>
 
 #include <QObject>
@@ -76,12 +77,21 @@ private:
 };
 
 typedef std::shared_ptr<ProviderThread> bridge_ptr;
+class QSocketNotifier;
 
-class QtBridge
+class QtBridge : public QObject
 {
+    Q_OBJECT;
 public:
+    QtBridge();
     bridge_ptr bridge_get(provider_factory_ptr factory);
+private slots:
+    void on_config_changed();
 private:
+    cor::inotify::Handle ih_;
+    cor::inotify::Watch watch_;
+    QSocketNotifier *notify_;
+
     std::map<QString, bridge_ptr> bridges;
 };
 

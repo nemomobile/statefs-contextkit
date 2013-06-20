@@ -58,6 +58,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %{_libdir}/statefs/libprovider-contextkit.so
 %{_libdir}/statefs/libprovider-qt4.so
+%{_bindir}/statefs-contextkit-register
 
 %files subscriber-qt4
 %defattr(-,root,root,-)

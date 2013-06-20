@@ -12,15 +12,14 @@ static void provider_release(statefs_provider *p) {
     statefs_provider_release(p);
 };
 
-static void (*original_release)(struct statefs_node*) = nullptr;
 static std::unique_ptr<cor::qt::CoreAppContainer> app;
 static provider_handle_type provider(nullptr, statefs_provider_release);
 static std::unique_ptr<cor::SharedLib> lib;
+static statefs_provider provider_copy;
 
 static void loader_release(struct statefs_node *node)
 {
-    if (original_release)
-        original_release(node);
+    std::cerr << "Releasing Qt preload provider" << std::endl;
     lib.reset(nullptr);
     provider.release();
     app.reset(nullptr);
@@ -34,6 +33,11 @@ static void load_provider()
     static const char *provider_path = "/usr/lib/statefs/libprovider-contextkit.so";
     static const char *sym_name = "statefs_provider_get";
 
+    std::cerr << "Loading Qt preload provider" << std::endl;
+    if (provider) {
+        std::cerr << "Provider is already loaded" << std::endl;
+        return;
+    }
     lib.reset(new cor::SharedLib(provider_path, RTLD_LAZY));
     if (!lib->is_loaded()) {
         std::cerr << "qtpreloader: Can't load library " << provider_path
@@ -57,15 +61,17 @@ static void load_provider()
         provider.reset(nullptr);
         return;
     }
-    original_release = provider->root.node.release;
-    provider->root.node.release = loader_release;
+    memcpy(&provider_copy, provider.get(), sizeof(provider_copy));
+    provider_copy.root.node.release = loader_release;
 }
 
 EXTERN_C struct statefs_provider * statefs_provider_get(void)
 {
-    app.reset(new cor::qt::CoreAppContainer());
-    app->execute(load_provider);
-    if (!provider)
-        app.reset(nullptr);
-    return provider.get();
+    if (!app) {
+        app.reset(new cor::qt::CoreAppContainer());
+        app->execute(load_provider);
+        if (!provider)
+            app.reset(nullptr);
+    }
+    return provider ? &provider_copy : nullptr;
 }

@@ -5,6 +5,7 @@ include(${QT_USE_FILE})
 add_definitions(-DQT_SHARED)
 include_directories(${QT_INCLUDE_DIR})
 configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
+configure_file(statefs-contextkit-register.in statefs-contextkit-register @ONLY)
 
 elseif(${USEQT} STREQUAL "5")
 
@@ -82,6 +83,7 @@ target_link_libraries(contextkit-statefs-qt4
 
 install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
 install(FILES contextkit-statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
+install(PROGRAMS statefs-contextkit-register DESTINATION bin)
 
 elseif(${USEQT} STREQUAL "5")
 

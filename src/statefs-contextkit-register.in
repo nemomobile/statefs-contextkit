@@ -1,0 +1,3 @@
+#!/bin/sh
+
+statefs register @CMAKE_INSTALL_PREFIX@/@DST_LIB@/statefs/libprovider-qt4.so

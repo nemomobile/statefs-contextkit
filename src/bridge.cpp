@@ -9,6 +9,7 @@
 #include <cor/error.hpp>
 #include <cor/util.hpp>
 
+#include <QProcess>
 #include <QFile>
 #include <QDomDocument>
 #include <QStringList>
@@ -17,6 +18,7 @@
 #include <QLibrary>
 #include <QSharedPointer>
 #include <QCoreApplication>
+#include <QSocketNotifier>
 
 #include <memory>
 #include <map>
@@ -45,6 +47,9 @@ class NamespaceNode;
 static std::vector<std::unique_ptr<NamespaceNode> > namespaces;
 static std::unique_ptr<QtBridge> qt_app;
 
+// TODO hard-coded path
+static const char *contextkit_config_dir = "/usr/share/contextkit/providers/";
+static const char *contextkit_plugins_dir = "/usr/lib/contextkit/subscriber-plugins/";
 
 class ProviderFactory
 {
@@ -99,8 +104,7 @@ private:
 
 plugin_ptr SharedObjFactory::plugin_get(QString const &name)
 {
-    // TODO hard-coded path
-    QString path("/usr/lib/contextkit/subscriber-plugins/");
+    QString path(contextkit_plugins_dir);
     path += (name + ".so");
     plugin_ptr lib(new QLibrary(path));
     lib->load();
@@ -526,6 +530,25 @@ provider_ptr ProviderBridge::provider()
                 , this, SLOT(onSubscribed(QString, TimedValue)));
     }
     return provider_;
+}
+
+QtBridge::QtBridge()
+    : watch_(ih_, contextkit_config_dir, IN_CREATE | IN_DELETE | IN_MODIFY)
+    , notify_(new QSocketNotifier(ih_.fd(), QSocketNotifier::Read, this))
+{
+    qDebug() << "QtBridge";
+    connect(notify_, SIGNAL(activated(int)), SLOT(on_config_changed()));
+    notify_->setEnabled(true);
+}
+
+void QtBridge::on_config_changed()
+{
+    qDebug() << "Contextkit configuration is changed, reregistering";
+    notify_->setEnabled(false);
+    char buf[sizeof(inotify_event) + PATH_MAX + 1];
+    ih_.read(buf, sizeof(buf));
+    notify_->setEnabled(true);
+    QProcess::startDetached("statefs-contextkit-register");
 }
 
 bridge_ptr QtBridge::bridge_get(provider_factory_ptr factory)
