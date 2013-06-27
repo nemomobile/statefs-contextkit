@@ -1,3 +1,3 @@
 #!/bin/sh
 
-statefs register @CMAKE_INSTALL_PREFIX@/@DST_LIB@/statefs/libprovider-qt4.so
+statefs register --statefs-type=qt4 @prefix@/@DST_LIB@/statefs/libprovider-contextkit.so

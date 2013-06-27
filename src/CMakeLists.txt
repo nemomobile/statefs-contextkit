@@ -1,17 +1,10 @@
 if(${USEQT} STREQUAL "4")
 
-find_package(Qt4 4.7.0 REQUIRED)
-include(${QT_USE_FILE})
-add_definitions(-DQT_SHARED)
-include_directories(${QT_INCLUDE_DIR})
 configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
 configure_file(statefs-contextkit-register.in statefs-contextkit-register @ONLY)
 
 elseif(${USEQT} STREQUAL "5")
 
-find_package(Qt5Core REQUIRED)
-include_directories(${Qt5Core_INCLUDE_DIRS})
-add_definitions(${Qt5Core_DEFINITIONS})
 configure_file(contextkit-statefs.pc.in contextkit-statefs.pc @ONLY)
 
 endif(${USEQT} STREQUAL "4")
@@ -39,20 +32,10 @@ set(SRC bridge.cpp util.cpp provider.cpp)
 set(HDRS bridge.hpp)
 qt4_wrap_cpp(BRIDGE_MOC_SRC ${HDRS})
 
-set(LOADER_SRC qtpreload.cpp wrapqt.cpp)
-set(LOADER_HDRS wrapqt.hpp)
-qt4_wrap_cpp(LOADER_MOC_SRC ${LOADER_HDRS})
-
 add_library(provider-contextkit
   SHARED
   ${SRC}
   ${BRIDGE_MOC_SRC}
-)
-
-add_library(provider-qt4
-  SHARED
-  ${LOADER_SRC}
-  ${LOADER_MOC_SRC}
 )
 
 # dirty hack: absolute path, moc is $$$
@@ -65,12 +48,7 @@ target_link_libraries(provider-contextkit
   ${CONTEXTPROVIDER_LIBRARIES}
 )
 
-target_link_libraries(provider-qt4
-  ${QT_QTCORE_LIBRARY}
-)
-
 install(TARGETS provider-contextkit DESTINATION ${DST_LIB}/statefs)
-install(TARGETS provider-qt4 DESTINATION ${DST_LIB}/statefs)
 
 add_library(contextkit-statefs-qt4
   SHARED property.cpp util.cpp

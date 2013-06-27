@@ -536,7 +536,6 @@ QtBridge::QtBridge()
     : watch_(ih_, contextkit_config_dir, IN_CREATE | IN_DELETE | IN_MODIFY)
     , notify_(new QSocketNotifier(ih_.fd(), QSocketNotifier::Read, this))
 {
-    qDebug() << "QtBridge";
     connect(notify_, SIGNAL(activated(int)), SLOT(on_config_changed()));
     notify_->setEnabled(true);
 }
