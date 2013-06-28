@@ -1,0 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main()
+{
+   setuid( 0 );
+   system("statefs register --statefs-type=qt4 @prefix@/@DST_LIB@/statefs/libprovider-contextkit.so");
+   return 0;
+}
+
+

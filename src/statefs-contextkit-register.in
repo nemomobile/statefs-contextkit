@@ -1,3 +1,0 @@
-#!/bin/sh
-
-statefs register --statefs-type=qt4 @prefix@/@DST_LIB@/statefs/libprovider-contextkit.so
