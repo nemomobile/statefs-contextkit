@@ -532,9 +532,11 @@ provider_ptr ProviderBridge::provider()
     return provider_;
 }
 
-QtBridge::QtBridge()
+QtBridge::QtBridge(statefs_server *server, statefs_provider *provider)
     : watch_(ih_, contextkit_config_dir, IN_CREATE | IN_DELETE | IN_MODIFY)
     , notify_(new QSocketNotifier(ih_.fd(), QSocketNotifier::Read, this))
+    , server_(server)
+    , provider_(provider)
 {
     connect(notify_, SIGNAL(activated(int)), SLOT(on_config_changed()));
     notify_->setEnabled(true);
@@ -547,7 +549,8 @@ void QtBridge::on_config_changed()
     char buf[sizeof(inotify_event) + PATH_MAX + 1];
     ih_.read(buf, sizeof(buf));
     notify_->setEnabled(true);
-    QProcess::startDetached("statefs-contextkit-register");
+    if (server_ && server_->event)
+        server_->event(server_, provider_, statefs_event_reload);
 }
 
 bridge_ptr QtBridge::bridge_get(provider_factory_ptr factory)
@@ -765,12 +768,12 @@ static void load_info()
     is_loaded = true;
 }
 
-EXTERN_C struct statefs_provider * statefs_provider_get(void)
+EXTERN_C struct statefs_provider *statefs_provider_get(statefs_server *server)
 {
     if (is_loaded)
         return &provider;
 
-    qt_app.reset(new QtBridge());
+    qt_app.reset(new QtBridge(server, &provider));
     load_info();
 
     return &provider;

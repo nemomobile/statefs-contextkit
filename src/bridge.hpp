@@ -78,12 +78,14 @@ private:
 
 typedef std::shared_ptr<ProviderThread> bridge_ptr;
 class QSocketNotifier;
+struct statefs_provider;
+struct statefs_server;
 
 class QtBridge : public QObject
 {
     Q_OBJECT;
 public:
-    QtBridge();
+    QtBridge(statefs_server*, statefs_provider*);
     bridge_ptr bridge_get(provider_factory_ptr factory);
 private slots:
     void on_config_changed();
@@ -93,6 +95,8 @@ private:
     QSocketNotifier *notify_;
 
     std::map<QString, bridge_ptr> bridges;
+    statefs_server *server_;
+    statefs_provider *provider_;
 };
 
 #endif // _STATEFS_CKIT_BRIDGE_HPP_
