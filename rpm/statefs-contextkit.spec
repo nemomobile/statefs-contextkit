@@ -6,7 +6,7 @@ License: LGPLv2
 Group: System Environment/Tools
 URL: http://github.com/nemomobile/statefs-contextkit
 Source0: %{name}-%{version}.tar.bz2
-BuildRequires: pkgconfig(statefs) >= 0.3.0
+BuildRequires: pkgconfig(statefs) >= 0.3.1
 BuildRequires: cmake >= 2.8
 BuildRequires: pkgconfig(cor) >= 0.1.4
 BuildRequires: pkgconfig(QtCore)
@@ -21,7 +21,7 @@ provider to reuse contextkit providers
 Summary: Provider to expose contextkit providers properties
 Group: System Environment/Libraries
 Requires: statefs-loader-qt4
-Requires: statefs
+Requires: statefs >= 0.3.2
 %description provider
 Provider exposes all contextkit providers properties
 
@@ -50,6 +50,9 @@ make %{?jobs:-j%jobs}
 %install
 rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
+install -d -D -p -m755 %{buildroot}%{_sharedstatedir}/statefs/hooks
+# workaround to allow bridge to be reregistered on contextkit cfg changes
+ln -sf %{_bindir}/statefs-contextkit-register %{buildroot}%{_sharedstatedir}/statefs/hooks/prestart-contextkit-register
 
 %clean
 rm -rf %{buildroot}
@@ -58,6 +61,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %{_libdir}/statefs/libprovider-contextkit.so
 %{_bindir}/statefs-contextkit-register
+%{_sharedstatedir}/statefs/hooks/prestart-contextkit-register
 
 %files subscriber-qt4
 %defattr(-,root,root,-)
