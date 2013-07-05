@@ -13,7 +13,7 @@ endif(${USEQT} STREQUAL "4")
 
 #-Wno-psabi is to remove next g++ warning/note:
 #the mangling of 'va_list' has changed in GCC 4.4
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi -fPIC -std=c++0x")
 
 if(${USEQT} STREQUAL "4")
 

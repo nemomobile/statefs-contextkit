@@ -12,6 +12,7 @@ set(SUBSCRIBER_LIB contextkit-statefs)
 
 endif(${USEQT} STREQUAL "4")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
 
 add_executable(atest-statefs_contextkit_subscriber_linking
   statefs_contextkit_subscriber_linking.cpp)
