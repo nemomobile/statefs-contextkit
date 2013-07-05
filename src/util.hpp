@@ -10,14 +10,7 @@
 bool getPropertyInfo(const QString &, QStringList &);
 QString getStateFsPath(const QString &);
 
-static inline QVariant cKitValueDecode(QString const& v)
-{
-    return QVariant(v);
-}
-
-static inline QString cKitValueEncode(QVariant const& v)
-{
-    return v.toString();
-}
+QVariant cKitValueDecode(QString const&);
+QString cKitValueEncode(QVariant const&);
 
 #endif // _STATEFS_CKIT_UTIL_HPP_
