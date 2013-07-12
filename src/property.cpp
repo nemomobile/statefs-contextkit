@@ -76,7 +76,7 @@ ContextPropertyPrivate::ContextPropertyPrivate(const QString &key, QObject *pare
     , file_(getStateFsPath(key))
     , notifier_(nullptr)
     , reopen_interval_(100)
-    , reopen_timer_(new QTimer())
+    , reopen_timer_(new QTimer(this))
     , is_subscribed_(false)
     , is_cached_(false)
 {
