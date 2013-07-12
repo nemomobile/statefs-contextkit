@@ -172,7 +172,8 @@ const ContextPropertyInfo* ContextPropertyPrivate::info() const
 
 void ContextPropertyPrivate::handleActivated(int)
 {
-    notifier_->setEnabled(false);
+    if (notifier_)
+        notifier_->setEnabled(false);
     is_cached_ = false;
     emit valueChanged();
 }
@@ -220,8 +221,10 @@ void ContextPropertyPrivate::unsubscribe() const
     if (!file_.isOpen())
         return;
 
-    notifier_->setEnabled(false);
-    notifier_.reset();
+    if (notifier_) {
+        notifier_->setEnabled(false);
+        notifier_.reset();
+    }
     file_.close();
 }
 
