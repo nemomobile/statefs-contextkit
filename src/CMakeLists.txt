@@ -1,6 +1,6 @@
 if(${USEQT} STREQUAL "4")
 
-configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
+#configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
 configure_file(register.c.in register.c @ONLY)
 
 add_executable(statefs-contextkit-register register.c)
@@ -16,19 +16,6 @@ endif(${USEQT} STREQUAL "4")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi -fPIC -std=c++0x")
 
 if(${USEQT} STREQUAL "4")
-
-pkg_check_modules(CONTEXTSUBSCRIBER contextsubscriber-1.0)
-pkg_check_modules(CONTEXTPROVIDER contextprovider-1.0)
-
-include_directories(
-  ${CONTEXTSUBSCRIBER_INCLUDE_DIRS}
-  ${CONTEXTPROVIDER_INCLUDE_DIRS}
-)
-
-link_directories(
-  ${CONTEXTSUBSCRIBER_LIBRARY_DIRS}
-  ${CONTEXTPROVIDER_LIBRARY_DIRS}
-)
 
 set(SRC bridge.cpp util.cpp provider.cpp)
 set(HDRS bridge.hpp)
@@ -52,17 +39,17 @@ target_link_libraries(provider-contextkit
 
 install(TARGETS provider-contextkit DESTINATION ${DST_LIB}/statefs)
 
-add_library(contextkit-statefs-qt4
-  SHARED property.cpp util.cpp
-  ${LIB_MOC_SRC}
-)
+#add_library(contextkit-statefs-qt4
+#  SHARED property.cpp util.cpp
+#  ${LIB_MOC_SRC}
+#)
 
-target_link_libraries(contextkit-statefs-qt4
-  ${QT_QTCORE_LIBRARY}
-)
+#target_link_libraries(contextkit-statefs-qt4
+#  ${QT_QTCORE_LIBRARY}
+#)
 
-install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
-install(FILES contextkit-statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
+#install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
+#install(FILES contextkit-statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
 install(TARGETS statefs-contextkit-register
   DESTINATION bin
   PERMISSIONS OWNER_READ OWNER_EXECUTE

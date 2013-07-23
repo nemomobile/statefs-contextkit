@@ -18,6 +18,7 @@ if(${USEQT} STREQUAL "4")
 find_package(Qt4 4.7.0 REQUIRED)
 include(${QT_USE_FILE})
 add_definitions(-DQT_SHARED)
+
 include_directories(
   ${QT_INCLUDE_DIR}
 )
@@ -60,10 +61,29 @@ link_directories(
   ${STATEFS_LIBRARY_DIRS}
 )
 
-if(${USEQT} STREQUAL "5")
+
+if(${USEQT} STREQUAL "4")
+
+pkg_check_modules(CONTEXTSUBSCRIBER contextsubscriber-1.0)
+pkg_check_modules(CONTEXTPROVIDER contextprovider-1.0)
+
+include_directories(
+  ${CONTEXTSUBSCRIBER_INCLUDE_DIRS}
+  ${CONTEXTPROVIDER_INCLUDE_DIRS}
+)
+
+link_directories(
+  ${CONTEXTSUBSCRIBER_LIBRARY_DIRS}
+  ${CONTEXTPROVIDER_LIBRARY_DIRS}
+)
+
+else(${USEQT} STREQUAL "4")
+
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include/contextsubscriber)
 install(FILES include/contextsubscriber/contextproperty.h DESTINATION include)
-endif(${USEQT} STREQUAL "5")
+
+endif(${USEQT} STREQUAL "4")
+
 
 add_subdirectory(src)
 add_subdirectory(tests)

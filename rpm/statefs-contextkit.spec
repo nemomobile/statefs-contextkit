@@ -25,21 +25,6 @@ Requires: statefs >= 0.3.2
 %description provider
 Provider exposes all contextkit providers properties
 
-%package subscriber-qt4
-Summary: Contextkit property interface using statefs
-Group: System Environment/Libraries
-Requires: statefs
-%description subscriber-qt4
-Contextkit property interface using statefs instead of contextkit
-
-%package subscriber-qt4-devel
-Summary: Contextkit property interface using statefs
-Group: System Environment/Libraries
-Requires: statefs-contextkit-subscriber-qt4
-Requires: contextkit-devel >= 0.5.39
-%description subscriber-qt4-devel
-Contextkit property interface using statefs instead of contextkit
-
 %prep
 %setup -q
 
@@ -62,14 +47,6 @@ rm -rf %{buildroot}
 %{_libdir}/statefs/libprovider-contextkit.so
 %{_bindir}/statefs-contextkit-register
 %{_sharedstatedir}/statefs/hooks/prestart-contextkit-register
-
-%files subscriber-qt4
-%defattr(-,root,root,-)
-%{_libdir}/libcontextkit-statefs-qt4.so
-
-%files subscriber-qt4-devel
-%defattr(-,root,root,-)
-%{_libdir}/pkgconfig/contextkit-statefs-qt4.pc
 
 %post provider
 statefs register --statefs-type=qt4  %{_libdir}/statefs/libprovider-contextkit.so || :
