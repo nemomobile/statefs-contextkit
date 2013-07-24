@@ -10,3 +10,4 @@ moc*
 *.a
 *automoc*
 atest*
+register.c
