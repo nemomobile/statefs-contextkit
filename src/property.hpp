@@ -34,6 +34,9 @@ public:
     CKitProperty(QString const &key, QObject *parent);
     virtual ~CKitProperty();
 
+    void subscribe () const;
+    void unsubscribe () const;
+
 signals:
     void changed(QVariant);
 
@@ -46,8 +49,6 @@ private:
     void resubscribe() const;
 
     QVariant value() const;
-    void subscribe () const;
-    void unsubscribe () const;
 
     QString key_;
     mutable QFile file_;

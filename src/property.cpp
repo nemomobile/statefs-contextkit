@@ -67,6 +67,7 @@ void PropertyMonitor::subscribe(ContextPropertyPrivate const *tgt, const QString
         handler = properties_[key];
     }
     connect(handler, &CKitProperty::changed, tgt, &ContextPropertyPrivate::changed);
+    handler->subscribe();
 }
 
 void PropertyMonitor::unsubscribe
@@ -116,7 +117,6 @@ CKitProperty::CKitProperty(const QString &key, QObject *parent)
 {
     reopen_timer_->setSingleShot(true);
     connect(reopen_timer_, SIGNAL(timeout()), this, SLOT(trySubscribe()));
-    subscribe();
 }
 
 CKitProperty::~CKitProperty()
@@ -255,7 +255,6 @@ ContextPropertyPrivate::ContextPropertyPrivate(const QString &key, QObject *pare
     , is_subscribed_(false)
     , is_cached_(false)
 {
-    subscribe();
 }
 
 ContextPropertyPrivate::~ContextPropertyPrivate()
@@ -349,6 +348,7 @@ ContextProperty::ContextProperty(const QString &key, QObject *parent)
     , priv(new ContextPropertyPrivate(key, this))
 {
     connect(priv, SIGNAL(valueChanged()), this, SIGNAL(valueChanged()));
+    priv->subscribe();
 }
 
 ContextProperty::~ContextProperty()
