@@ -150,6 +150,7 @@ void CKitProperty::resubscribe() const
 QVariant CKitProperty::value() const
 {
     QVariant res;
+    static const size_t cap = 8;
 
     if (is_cached_)
         return cache_;
@@ -167,9 +168,9 @@ QVariant CKitProperty::value() const
     file_.seek(0);
     auto size = file_.size();
     if (buffer_.size() < size)
-        buffer_.resize(size + 8);
+        buffer_.resize(size + cap);
 
-    int rc = file_.read(buffer_.data(), size + 7);
+    int rc = file_.read(buffer_.data(), size + cap - 1);
     touchFile.close();
     if (rc >= 0) {
         buffer_[rc] = '\0';
