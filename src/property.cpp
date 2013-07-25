@@ -57,7 +57,8 @@ void PropertyMonitor::subscribe(ContextPropertyPrivate const *tgt, const QString
     CKitProperty *handler;
     auto it = targets_.find(key);
     if (it == targets_.end()) {
-        targets_.insert(key, QSet<ContextPropertyPrivate const*>({tgt}));
+        it = targets_.insert(key, QSet<ContextPropertyPrivate const*>());
+        it->insert(tgt);
         handler = add(key);
     } else {
         if (it->contains(tgt)) {
@@ -66,7 +67,9 @@ void PropertyMonitor::subscribe(ContextPropertyPrivate const *tgt, const QString
         it->insert(tgt);
         handler = properties_[key];
     }
-    connect(handler, &CKitProperty::changed, tgt, &ContextPropertyPrivate::changed);
+    // TODO when qt4 support will be removed
+    //connect(handler, &CKitProperty::changed, tgt, &ContextPropertyPrivate::changed);
+    connect(handler, SIGNAL(changed(QVariant)), tgt, SLOT(changed(QVariant)));
     handler->subscribe();
 }
 
@@ -88,8 +91,10 @@ void PropertyMonitor::unsubscribe
 
     auto handler = h_it.value();
 
-    disconnect(handler, &CKitProperty::changed
-               , tgt, &ContextPropertyPrivate::changed);
+    // TODO when qt4 support will be removed
+    // disconnect(handler, &CKitProperty::changed
+    //           , tgt, &ContextPropertyPrivate::changed);
+    disconnect(handler, SIGNAL(changed(QVariant)), tgt, SLOT(changed(QVariant)));
     tgt_set.erase(ptgt);
     if (!tgt_set.isEmpty())
         return;
