@@ -64,8 +64,8 @@ link_directories(
 
 if(${USEQT} STREQUAL "4")
 
-pkg_check_modules(CONTEXTSUBSCRIBER contextsubscriber-1.0)
-pkg_check_modules(CONTEXTPROVIDER contextprovider-1.0)
+pkg_check_modules(CONTEXTSUBSCRIBER contextsubscriber-1.0 REQUIRED)
+pkg_check_modules(CONTEXTPROVIDER contextprovider-1.0 REQUIRED)
 
 include_directories(
   ${CONTEXTSUBSCRIBER_INCLUDE_DIRS}
