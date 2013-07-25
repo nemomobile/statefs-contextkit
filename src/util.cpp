@@ -3,6 +3,8 @@
 
 #include <QRegExp>
 #include <QDebug>
+#include <QDate>
+#include <QDateTime>
 
 
 bool getPropertyInfo(const QString &name, QStringList &parts)
@@ -90,5 +92,25 @@ QString cKitValueEncode(QVariant const& v)
         return v.toBool() ? "1" : "0";
     default:
         return v.toString();
+    }
+}
+
+QVariant cKitValueDefault(QVariant const& v)
+{
+    switch (v.type()) {
+    case QVariant::String:
+        return "";
+    case QVariant::Int:
+        return 0;
+    case QVariant::UInt:
+        return QVariant((unsigned)0);
+    case QVariant::Double:
+        return QVariant((double)0);
+    case QVariant::Date:
+        return QDate();
+    case QVariant::DateTime:
+        return QDateTime();
+    default:
+        return QVariant(v.type());
     }
 }

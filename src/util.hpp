@@ -12,5 +12,6 @@ QString getStateFsPath(const QString &);
 
 QVariant cKitValueDecode(QString const&);
 QString cKitValueEncode(QVariant const&);
+QVariant cKitValueDefault(QVariant const&);
 
 #endif // _STATEFS_CKIT_UTIL_HPP_
