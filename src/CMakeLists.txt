@@ -1,6 +1,6 @@
 if(${USEQT} STREQUAL "4")
 
-#configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
+configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
 configure_file(register.c.in register.c @ONLY)
 
 add_executable(statefs-contextkit-register register.c)
@@ -39,17 +39,17 @@ target_link_libraries(provider-contextkit
 
 install(TARGETS provider-contextkit DESTINATION ${DST_LIB}/statefs)
 
-#add_library(contextkit-statefs-qt4
-#  SHARED property.cpp util.cpp
-#  ${LIB_MOC_SRC}
-#)
+add_library(contextkit-statefs-qt4
+  SHARED property.cpp util.cpp
+  ${LIB_MOC_SRC}
+)
 
-#target_link_libraries(contextkit-statefs-qt4
-#  ${QT_QTCORE_LIBRARY}
-#)
+target_link_libraries(contextkit-statefs-qt4
+  ${QT_QTCORE_LIBRARY}
+)
 
-#install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
-#install(FILES contextkit-statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
+install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
+install(FILES contextkit-statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
 install(TARGETS statefs-contextkit-register
   DESTINATION bin
   PERMISSIONS OWNER_READ OWNER_EXECUTE
