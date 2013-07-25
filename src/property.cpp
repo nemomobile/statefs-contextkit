@@ -81,7 +81,7 @@ void PropertyMonitor::unsubscribe
     auto ptgt = tgt_set.find(tgt);
     if (ptgt == tgt_set.end())
         return;
-    
+
     auto h_it = properties_.find(key);
     if (h_it == properties_.end())
         return;
@@ -113,7 +113,6 @@ CKitProperty::CKitProperty(const QString &key, QObject *parent)
     , reopen_interval_(100)
     , reopen_timer_(new QTimer(this))
     , is_subscribed_(false)
-    , is_cached_(false)
 {
     reopen_timer_->setSingleShot(true);
     connect(reopen_timer_, SIGNAL(timeout()), this, SLOT(trySubscribe()));
@@ -147,17 +146,13 @@ void CKitProperty::resubscribe() const
         subscribe();
 }
 
-QVariant CKitProperty::value() const
+void CKitProperty::update()
 {
-    QVariant res;
-    static const size_t cap = 8;
-
-    if (is_cached_)
-        return cache_;
+    static const size_t cap = 31;
 
     if (!tryOpen()) {
         qWarning() << "Can't open " << file_.fileName();
-        return res;
+        cache_ = cKitValueDefault(cache_);
     }
 
     // WORKAROUND: file is just opened and closed before reading from
@@ -168,18 +163,30 @@ QVariant CKitProperty::value() const
     file_.seek(0);
     auto size = file_.size();
     if (buffer_.size() < size)
-        buffer_.resize(size + cap);
+        buffer_.resize(size + cap + 1);
 
-    int rc = file_.read(buffer_.data(), size + cap - 1);
+    int rc = file_.read(buffer_.data(), size + cap);
+    if (rc > size) {
+        int read = 0;
+        while (rc > 0) {
+            read += rc;
+            buffer_.resize(buffer_.size() + read + 1);
+            rc = file_.read(buffer_.data() + read, read);
+        }
+        rc = read;
+    }
     touchFile.close();
     if (rc >= 0) {
         buffer_[rc] = '\0';
         auto s = QString(buffer_);
-        if (s.size()) // use read data if not empty
-            res = cKitValueDecode(s);
-
-        cache_ = res;
-        is_cached_ = true;
+        if (s.size()) {
+            cache_ = cKitValueDecode(s);
+        } else {
+            if (cache_.isNull())
+                cache_ = s;
+            else
+                cache_ = cKitValueDefault(cache_);
+        }
 
         if (notifier_)
             notifier_->setEnabled(true);
@@ -187,15 +194,15 @@ QVariant CKitProperty::value() const
         qWarning() << "Error accessing? " << rc << "..." << file_.fileName();
         resubscribe();
     }
-    return res;
 }
 
 void CKitProperty::handleActivated(int)
 {
     if (notifier_)
         notifier_->setEnabled(false);
-    is_cached_ = false;
-    emit changed(value());
+
+    update();
+    emit changed(cache_);
 }
 
 bool CKitProperty::tryOpen() const
@@ -212,7 +219,6 @@ bool CKitProperty::tryOpen() const
         qWarning() << "Can't open " << file_.fileName();
         return false;
     }
-    is_cached_ = false;
     return true;
 }
 
@@ -292,7 +298,7 @@ ckit::Actor<ckit::PropertyMonitor> * ContextPropertyPrivate::actor()
     isActorCreated = true;
     return propertyMonitor;
 }
- 
+
 void ContextPropertyPrivate::changed(QVariant v)
 {
     if (v.isNull() || (is_cached_ && v == cache_))

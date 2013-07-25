@@ -34,11 +34,11 @@ public:
     CKitProperty(QString const &key, QObject *parent);
     virtual ~CKitProperty();
 
-    void subscribe () const;
-    void unsubscribe () const;
+    void subscribe() const;
+    void unsubscribe() const;
 
 signals:
-    void changed(QVariant);
+    void changed(QVariant) const;
 
 private slots:
     void handleActivated(int);
@@ -48,7 +48,7 @@ private:
     bool tryOpen() const;
     void resubscribe() const;
 
-    QVariant value() const;
+    void update();
 
     QString key_;
     mutable QFile file_;
@@ -57,8 +57,7 @@ private:
     mutable int reopen_interval_;
     mutable QTimer *reopen_timer_;
     mutable bool is_subscribed_;
-    mutable bool is_cached_;
-    mutable QVariant cache_;
+    QVariant cache_;
 };
 
 class Actor_ : public QThread
