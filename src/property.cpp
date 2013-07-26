@@ -325,7 +325,6 @@ void ContextPropertyPrivate::subscribe() const
         return;
 
     actor()->postEvent(new ckit::PropertyRequest(ckit::Event::Subscribe, this, key_));
-    QCoreApplication::processEvents();
     is_subscribed_ = true;
 }
 
