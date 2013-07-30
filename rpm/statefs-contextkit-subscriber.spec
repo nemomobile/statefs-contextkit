@@ -6,9 +6,9 @@ License: LGPLv2
 Group: System Environment/Tools
 URL: http://github.com/nemomobile/statefs-contextkit
 Source0: %{name}-%{version}.tar.bz2
-BuildRequires: pkgconfig(statefs) >= 0.2.11
+BuildRequires: pkgconfig(statefs) >= 0.3.5
 BuildRequires: cmake >= 2.8
-BuildRequires: pkgconfig(cor) >= 0.1.3
+BuildRequires: pkgconfig(cor) >= 0.1.5
 BuildRequires: pkgconfig(Qt5Core)
 Requires: statefs
 

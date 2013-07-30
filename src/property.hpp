@@ -141,17 +141,6 @@ private:
 
 };
 
-class PropertyRequest : public Event
-{
-public:
-    PropertyRequest(Event::Type, ContextPropertyPrivate const*, QString const&);
-    virtual ~PropertyRequest();
-
-    ContextPropertyPrivate const *tgt_;
-    QString key_;
-};
-
-
 }
 
 class ContextPropertyPrivate : public QObject

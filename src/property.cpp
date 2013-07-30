@@ -1,11 +1,14 @@
 #include "property.hpp"
 #include "util.hpp"
 
+#include <cor/mt.hpp>
+
 #include <contextproperty.h>
 #include <QDebug>
 #include <QTimer>
 #include <QSocketNotifier>
 #include <QMutex>
+#include <memory>
 
 namespace ckit
 {
@@ -19,15 +22,36 @@ Event::Event(Event::Type t)
 {}
 
 Event::~Event() {}
-PropertyRequest::~PropertyRequest() {}
+
+
+class PropertyRequest : public Event
+{
+public:
+    PropertyRequest(Event::Type
+                    , ContextPropertyPrivate const*
+                    , QString const&
+                    , std::function<void()>);
+    virtual ~PropertyRequest();
+
+    ContextPropertyPrivate const *tgt_;
+    QString key_;
+    std::function<void()> done_;
+};
 
 PropertyRequest::PropertyRequest(Event::Type t
                                  , ContextPropertyPrivate const *tgt
-                                 , QString const &key)
+                                 , QString const &key
+                                 , std::function<void()> done)
     : Event(t)
     , tgt_(tgt)
     , key_(key)
+    , done_(done)
 {}
+
+PropertyRequest::~PropertyRequest()
+{
+    done_();
+}
 
 bool PropertyMonitor::event(QEvent *e)
 {
@@ -44,6 +68,7 @@ bool PropertyMonitor::event(QEvent *e)
     case Event::Unsubscribe: {
         auto p = static_cast<PropertyRequest*>(e);
         unsubscribe(p->tgt_, p->key_);
+        p->done_();
         break;
     }
     default:
@@ -100,8 +125,8 @@ void PropertyMonitor::unsubscribe
         return;
 
     targets_.erase(t_it);
-    handler->deleteLater();
     properties_.erase(h_it);
+    handler->deleteLater();
 }
 
 CKitProperty* PropertyMonitor::add(const QString &key)
@@ -324,7 +349,9 @@ void ContextPropertyPrivate::subscribe() const
     if (is_subscribed_)
         return;
 
-    actor()->postEvent(new ckit::PropertyRequest(ckit::Event::Subscribe, this, key_));
+    auto ev = new ckit::PropertyRequest
+        (ckit::Event::Subscribe, this, key_, []() {});
+    actor()->postEvent(ev);
     is_subscribed_ = true;
 }
 
@@ -333,7 +360,13 @@ void ContextPropertyPrivate::unsubscribe() const
     if (!is_subscribed_)
         return;
 
-    actor()->postEvent(new ckit::PropertyRequest(ckit::Event::Unsubscribe, this, key_));
+    cor::Future future;
+
+    auto ev = new ckit::PropertyRequest
+        (ckit::Event::Unsubscribe, this, key_, future.waker());
+    actor()->postEvent(ev);
+    // wait until unsubscribed
+    future.wait(std::chrono::milliseconds(20000));
     is_subscribed_ = false;
 }
 

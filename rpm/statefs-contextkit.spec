@@ -6,9 +6,9 @@ License: LGPLv2
 Group: System Environment/Tools
 URL: http://github.com/nemomobile/statefs-contextkit
 Source0: %{name}-%{version}.tar.bz2
-BuildRequires: pkgconfig(statefs) >= 0.3.1
+BuildRequires: pkgconfig(statefs) >= 0.3.5
 BuildRequires: cmake >= 2.8
-BuildRequires: pkgconfig(cor) >= 0.1.4
+BuildRequires: pkgconfig(cor) >= 0.1.5
 BuildRequires: pkgconfig(QtCore)
 BuildRequires: pkgconfig(QtXml)
 BuildRequires: contextkit-devel
@@ -21,7 +21,7 @@ provider to reuse contextkit providers
 Summary: Provider to expose contextkit providers properties
 Group: System Environment/Libraries
 Requires: statefs-loader-qt4
-Requires: statefs >= 0.3.2
+Requires: statefs >= 0.3.5
 %description provider
 Provider exposes all contextkit providers properties
 

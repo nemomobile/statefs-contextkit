@@ -4,8 +4,11 @@
 #include <QString>
 #include <QStringList>
 #include <QDebug>
+#include <QMutex>
+#include <QWaitCondition>
 
 #include <array>
+#include <memory>
 
 bool getPropertyInfo(const QString &, QStringList &);
 QString getStateFsPath(const QString &);
