@@ -183,6 +183,8 @@ void CKitProperty::update()
     if (!tryOpen()) {
         qWarning() << "Can't open " << file_.fileName();
         cache_ = cKitValueDefault(cache_);
+        resubscribe();
+        return;
     }
 
     // WORKAROUND: file is just opened and closed before reading from
