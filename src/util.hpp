@@ -10,11 +10,15 @@
 #include <array>
 #include <memory>
 
-bool getPropertyInfo(const QString &, QStringList &);
-QString getStateFsPath(const QString &);
+namespace statefs { namespace qt {
 
-QVariant cKitValueDecode(QString const&);
-QString cKitValueEncode(QVariant const&);
-QVariant cKitValueDefault(QVariant const&);
+bool splitPropertyName(const QString &, QStringList &);
+QString getPath(const QString &);
+
+QVariant valueDecode(QString const&);
+QString valueEncode(QVariant const&);
+QVariant valueDefault(QVariant const&);
+
+}}
 
 #endif // _STATEFS_CKIT_UTIL_HPP_

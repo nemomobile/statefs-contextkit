@@ -138,7 +138,7 @@ CKitProperty* PropertyMonitor::add(const QString &key)
 CKitProperty::CKitProperty(const QString &key, QObject *parent)
     : QObject(parent)
     , key_(key)
-    , file_(getStateFsPath(key))
+    , file_(statefs::qt::getPath(key))
     , notifier_(nullptr)
     , reopen_interval_(100)
     , reopen_timer_(new QTimer(this))
@@ -182,7 +182,7 @@ void CKitProperty::update()
 
     if (!tryOpen()) {
         qWarning() << "Can't open " << file_.fileName();
-        cache_ = cKitValueDefault(cache_);
+        cache_ = statefs::qt::valueDefault(cache_);
         resubscribe();
         return;
     }
@@ -212,12 +212,12 @@ void CKitProperty::update()
         buffer_[rc] = '\0';
         auto s = QString(buffer_);
         if (s.size()) {
-            cache_ = cKitValueDecode(s);
+            cache_ = statefs::qt::valueDecode(s);
         } else {
             if (cache_.isNull())
                 cache_ = s;
             else
-                cache_ = cKitValueDefault(cache_);
+                cache_ = statefs::qt::valueDefault(cache_);
         }
 
         if (notifier_)

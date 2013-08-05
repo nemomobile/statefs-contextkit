@@ -5,15 +5,17 @@
 #include <QDebug>
 #include <QDate>
 #include <QDateTime>
+#include <QDir>
 
+namespace statefs { namespace qt {
 
-bool getPropertyInfo(const QString &name, QStringList &parts)
+bool splitPropertyName(const QString &name, QStringList &parts)
 {
     QRegExp re("[./]");
     re.setPatternSyntax(QRegExp::RegExp);
     parts = name.split(re);
     if (!parts.size()) {
-        qDebug() << "format is wrong:" << name;
+        qWarning() << "Can't parse property name:" << name;
         return false;
     }
 
@@ -31,17 +33,17 @@ bool getPropertyInfo(const QString &name, QStringList &parts)
     return (parts.size() == 2);
 }
 
-QString getStateFsPath(const QString &name)
+QString getPath(const QString &name)
 {
     QStringList parts;
-    if (!getPropertyInfo(name, parts)) {
-        qDebug() << "Unexpected name structure: " << name;
+    if (!splitPropertyName(name, parts))
         return "";
-    }
-    parts.push_front("state/namespaces");
+
+    parts.push_front("namespaces");
+    parts.push_front("state");
     parts.push_front(::getenv("XDG_RUNTIME_DIR")); // TODO hardcoded path!
 
-    return parts.join("/");
+    return parts.join(QDir::separator());
 }
 
 static QRegExp re(QString const &cs)
@@ -70,7 +72,7 @@ static const std::initializer_list<std::pair<QRegExp, QVariant::Type> > re_types
    , {re(datetime_re), QVariant::DateTime}
 };
 
-QVariant cKitValueDecode(QString const& s)
+QVariant valueDecode(QString const& s)
 {
 	if (!s.size())
 		return QVariant(s);
@@ -85,7 +87,7 @@ QVariant cKitValueDecode(QString const& s)
 	return v;
 }
 
-QString cKitValueEncode(QVariant const& v)
+QString valueEncode(QVariant const& v)
 {
     switch(v.type()) {
     case QVariant::Bool:
@@ -95,7 +97,7 @@ QString cKitValueEncode(QVariant const& v)
     }
 }
 
-QVariant cKitValueDefault(QVariant const& v)
+QVariant valueDefault(QVariant const& v)
 {
     switch (v.type()) {
     case QVariant::String:
@@ -114,3 +116,5 @@ QVariant cKitValueDefault(QVariant const& v)
         return QVariant(v.type());
     }
 }
+
+}}

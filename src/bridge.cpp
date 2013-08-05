@@ -185,7 +185,7 @@ property_ptr PropInfo::create
 (QString const& name, provider_factory_ptr factory)
 {
     QStringList parts;
-    if (!getPropertyInfo(name, parts) || parts.size() != 2)
+    if (!statefs::qt::splitPropertyName(name, parts) || parts.size() != 2)
         throw cor::Error((name + " is not correct?").toStdString());
     return property_ptr(new PropInfo(name, parts[0], parts[1], factory));
 }
@@ -300,7 +300,7 @@ public:
 
     void notify(QVariant const &v)
     {
-        v_ = cKitValueEncode(v);
+        v_ = statefs::qt::valueEncode(v);
         if (is_first_access_) {
             std::lock_guard<std::mutex> lock(mutex_);
             if (is_first_access_)
