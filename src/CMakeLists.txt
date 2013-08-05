@@ -17,7 +17,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi -fPIC -std=c++0x")
 
 if(${USEQT} STREQUAL "4")
 
-set(SRC bridge.cpp util.cpp provider.cpp)
+add_library(statefs-qt4
+  SHARED util.cpp
+)
+
+install(TARGETS statefs-qt4 DESTINATION ${DST_LIB})
+
+set(SRC bridge.cpp provider.cpp)
 set(HDRS bridge.hpp)
 qt4_wrap_cpp(BRIDGE_MOC_SRC ${HDRS})
 
@@ -35,17 +41,19 @@ target_link_libraries(provider-contextkit
   ${QT_QTXML_LIBRARY}
   ${CONTEXTSUBSCRIBER_LIBRARIES}
   ${CONTEXTPROVIDER_LIBRARIES}
+  statefs-qt4
 )
 
 install(TARGETS provider-contextkit DESTINATION ${DST_LIB}/statefs)
 
 add_library(contextkit-statefs-qt4
-  SHARED property.cpp util.cpp
+  SHARED property.cpp
   ${LIB_MOC_SRC}
 )
 
 target_link_libraries(contextkit-statefs-qt4
   ${QT_QTCORE_LIBRARY}
+  statefs-qt4
 )
 
 install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
@@ -60,17 +68,24 @@ install(TARGETS statefs-contextkit-register
 
 elseif(${USEQT} STREQUAL "5")
 
+add_library(statefs-qt5
+  SHARED util.cpp
+)
+
+install(TARGETS statefs-qt5 DESTINATION ${DST_LIB})
+
 qt5_wrap_cpp(LIB_MOC_SRC ${CMAKE_SOURCE_DIR}/include/contextsubscriber/contextproperty.h)
 # to avoid clashing with qt4 version when building in the same dir
 qt5_generate_moc(property.hpp moc_property_qt5.cpp)
 
 add_library(contextkit-statefs
-  SHARED property.cpp util.cpp moc_property_qt5.cpp
+  SHARED property.cpp moc_property_qt5.cpp
   ${LIB_MOC_SRC}
 )
 
 target_link_libraries(contextkit-statefs
   ${Qt5Core_LIBRARIES}
+  statefs-qt5
 )
 
 install(TARGETS contextkit-statefs DESTINATION ${DST_LIB})
