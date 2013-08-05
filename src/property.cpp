@@ -1,5 +1,5 @@
 #include "property.hpp"
-#include "util.hpp"
+#include <statefs/qt/util.hpp>
 
 #include <cor/mt.hpp>
 

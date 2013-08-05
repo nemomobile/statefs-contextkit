@@ -1,5 +1,5 @@
-#ifndef _STATEFS_CKIT_UTIL_HPP_
-#define _STATEFS_CKIT_UTIL_HPP_
+#ifndef _STATEFS_QT_UTIL_HPP_
+#define _STATEFS_QT_UTIL_HPP_
 
 #include <QString>
 #include <QStringList>
@@ -21,4 +21,4 @@ QVariant valueDefault(QVariant const&);
 
 }}
 
-#endif // _STATEFS_CKIT_UTIL_HPP_
+#endif // _STATEFS_QT_UTIL_HPP_
