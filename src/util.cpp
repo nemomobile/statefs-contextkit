@@ -1,4 +1,11 @@
-#include <statefs/qt/util.hpp>
+/**
+ * @file util.cpp
+ * @brief Statefs utilities for Qt-based apps and libraries
+ * @author (C) 2013 Jolla Ltd. Denis Zalevskiy <denis.zalevskiy@jollamobile.com>
+ * @copyright LGPL 2.1 http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ */
+
+#include "util_p.hpp"
 #include <cor/error.hpp>
 
 #include <QRegExp>
@@ -6,9 +13,27 @@
 #include <QDate>
 #include <QDateTime>
 #include <QDir>
+#include <QFile>
 
-namespace statefs { namespace qt {
+namespace statefs {
+/// All StateFS Qt bindings are put into this namespace
+namespace qt {
 
+/**
+ * @defgroup util Miscellaneous StateFS Utilities
+ *
+ * @{
+ */
+
+/**
+ * split full property name (dot- or slash-separated) to statefs path
+ * parts relative to the namespace/provider root directory
+ *
+ * @param name full property name (including all namespaces/domains)
+ * @param parts output parameter to accept path parts
+ *
+ * @return true if property name was succesfully splitted
+ */
 bool splitPropertyName(const QString &name, QStringList &parts)
 {
     QRegExp re("[./]");
@@ -33,6 +58,14 @@ bool splitPropertyName(const QString &name, QStringList &parts)
     return (parts.size() == 2);
 }
 
+/**
+ * get path to the statefs property file for the statefs instance
+ * mounted to the default statefs root
+ *
+ * @param name dot- or slash-separated full property name
+ *
+ * @return full path to the property file
+ */
 QString getPath(const QString &name)
 {
     QStringList parts;
@@ -41,7 +74,7 @@ QString getPath(const QString &name)
 
     parts.push_front("namespaces");
     parts.push_front("state");
-    parts.push_front(::getenv("XDG_RUNTIME_DIR")); // TODO hardcoded path!
+    parts.push_front(::getenv("XDG_RUNTIME_DIR")); // TODO hardcoded source!
 
     return parts.join(QDir::separator());
 }
@@ -72,6 +105,15 @@ static const std::initializer_list<std::pair<QRegExp, QVariant::Type> > re_types
    , {re(datetime_re), QVariant::DateTime}
 };
 
+/**
+ * try to convert input string to QVariant using simple
+ * heuristics.
+ *
+ * @param s input string
+ *
+ * @return result of conversion or input string wrapped into QVariant
+ * otherwise
+ */
 QVariant valueDecode(QString const& s)
 {
 	if (!s.size())
@@ -87,6 +129,16 @@ QVariant valueDecode(QString const& s)
 	return v;
 }
 
+/**
+ * convert QVariant to QString, function reuses QVariant::toString()
+ * but can process some types in a different way. E.g. boolean value
+ * is encoded as 0/1 to be compatible with conventions used by sysfs
+ * etc.
+ *
+ * @param v value to be converted
+ *
+ * @return resulting string
+ */
 QString valueEncode(QVariant const& v)
 {
     switch(v.type()) {
@@ -116,5 +168,135 @@ QVariant valueDefault(QVariant const& v)
         return QVariant(v.type());
     }
 }
+
+static std::unique_ptr<QFile> fileFromName(const QString &name)
+{
+    return std::unique_ptr<QFile>{new QFile(getPath(name))};
+}
+
+WriterImpl::WriterImpl(const QString &name)
+    : name_(name)
+    , file_(fileFromName(name))
+{
+}
+
+WriterImpl::~WriterImpl()
+{
+}
+
+bool WriterImpl::exists() const
+{
+    return file_->exists();
+}
+
+QString const &WriterImpl::name() const
+{
+    return name_;
+}
+
+FileErrorNs::FileError WriterImpl::set(const QVariant &v)
+{
+    auto s = valueEncode(v);
+    if (!file_->open(QIODevice::WriteOnly))
+        return file_->error();
+
+    QByteArray data{s.toUtf8().data()};
+    if (file_->write(data) != data.size())
+        return file_->error();
+
+    file_->close();
+    return FileErrorNs::NoError;
+}
+
+Writer::Writer(const QString &name)
+    : impl(new WriterImpl(name))
+{
+}
+
+Writer::~Writer()
+{
+}
+
+bool Writer::exists() const
+{
+    return impl->exists();
+}
+
+QString Writer::name() const
+{
+    return impl->name();
+}
+
+FileErrorNs::FileError Writer::set(const QVariant &v)
+{
+    return impl->set(v);
+}
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup inout InOut Provider API
+ *
+ * @brief Support for updating properties supplied through InOut
+ * StateFS loader (see statefs documentation for details)
+ *
+ * @{
+ */
+
+/**
+ * Construct InOut property writer used to change corresponding
+ * output property
+ *
+ * @param name full output property name (dot- or
+ * slash-separated)
+ */
+InOutWriter::InOutWriter(const QString &name)
+    : impl(new WriterImpl(QString("@") + name))
+{
+}
+
+InOutWriter::~InOutWriter()
+{
+}
+
+/**
+ * can be used to check does corresponding input property exists at
+ * the moment (it can be absent e.g. when statefs is not started yet
+ * or is restarting)
+ *
+ * @return true if input property with this name exists
+ */
+bool InOutWriter::exists() const
+{
+    return impl->exists();
+}
+
+/**
+ * @return output property name
+ */
+QString InOutWriter::name() const
+{
+    return impl->name().mid(1);
+}
+
+/**
+ * set input property to supplied value, value is converted to string
+ * using valueEncode(). Output property will be updated if input
+ * property exists and writable.
+ *
+ * @param v value to be set
+ *
+ * @return file operation status
+ */
+FileErrorNs::FileError InOutWriter::set(const QVariant &v)
+{
+    return impl->set(v);
+}
+
+/**
+ * @}
+ */
 
 }}
