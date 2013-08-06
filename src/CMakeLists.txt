@@ -1,6 +1,7 @@
 if(${USEQT} STREQUAL "4")
 
 configure_file(contextkit-statefs-qt4.pc.in contextkit-statefs-qt4.pc @ONLY)
+configure_file(statefs-qt4.pc.in statefs-qt4.pc @ONLY)
 configure_file(register.c.in register.c @ONLY)
 
 add_executable(statefs-contextkit-register register.c)
@@ -8,6 +9,7 @@ add_executable(statefs-contextkit-register register.c)
 elseif(${USEQT} STREQUAL "5")
 
 configure_file(contextkit-statefs.pc.in contextkit-statefs.pc @ONLY)
+configure_file(statefs-qt5.pc.in statefs-qt5.pc @ONLY)
 
 endif(${USEQT} STREQUAL "4")
 
@@ -58,6 +60,7 @@ target_link_libraries(contextkit-statefs-qt4
 
 install(TARGETS contextkit-statefs-qt4 DESTINATION ${DST_LIB})
 install(FILES contextkit-statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
+install(FILES statefs-qt4.pc DESTINATION ${DST_LIB}/pkgconfig)
 install(TARGETS statefs-contextkit-register
   DESTINATION bin
   PERMISSIONS OWNER_READ OWNER_EXECUTE
@@ -90,6 +93,7 @@ target_link_libraries(contextkit-statefs
 
 install(TARGETS contextkit-statefs DESTINATION ${DST_LIB})
 install(FILES contextkit-statefs.pc DESTINATION ${DST_LIB}/pkgconfig)
+install(FILES statefs-qt5.pc DESTINATION ${DST_LIB}/pkgconfig)
 
 endif(${USEQT} STREQUAL "4")
 

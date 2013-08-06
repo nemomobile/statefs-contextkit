@@ -1,6 +1,10 @@
 PROJECT(statefs-contextkit)
 cmake_minimum_required(VERSION 2.8)
 
+IF(NOT DEFINED STATEFS_QT_VERSION)
+MESSAGE(FATAL_ERROR "Define STATEFS_QT_VERSION")
+ENDIF(NOT DEFINED STATEFS_QT_VERSION)
+
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
   SET(LIB_SUFFIX "")
 ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -23,12 +27,14 @@ add_definitions(-DQT_SHARED)
 include_directories(
   ${QT_INCLUDE_DIR}
 )
+install(DIRECTORY include/statefs DESTINATION include/qt4)
 
 elseif(${USEQT} STREQUAL "5")
 
 find_package(Qt5Core REQUIRED)
 include_directories(${Qt5Core_INCLUDE_DIRS})
 add_definitions(${Qt5Core_DEFINITIONS})
+install(DIRECTORY include/statefs DESTINATION include/qt5)
 
 endif(${USEQT} STREQUAL "4")
 
@@ -83,6 +89,9 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include/contextsubscriber)
 install(FILES include/contextsubscriber/contextproperty.h DESTINATION include)
 
 endif(${USEQT} STREQUAL "4")
+
+add_custom_target(doc
+  COMMAND doxygen ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile)
 
 add_subdirectory(src)
 add_subdirectory(tests)

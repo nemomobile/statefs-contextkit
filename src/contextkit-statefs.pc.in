@@ -4,6 +4,6 @@ includedir=${prefix}/include
 
 Name: contextkit-statefs
 Description: Contextkit subscriber interface to statefs
-Version: 0.2.15
+Version: @STATEFS_QT_VERSION@
 Libs: -lcontextkit-statefs
 Cflags: -I${includedir}

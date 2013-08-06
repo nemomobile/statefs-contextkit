@@ -6,7 +6,7 @@ License: LGPLv2
 Group: System Environment/Tools
 URL: http://github.com/nemomobile/statefs-contextkit
 Source0: %{name}-%{version}.tar.bz2
-BuildRequires: pkgconfig(statefs) >= 0.3.5
+BuildRequires: pkgconfig(statefs) >= 0.3.6
 BuildRequires: cmake >= 2.8
 BuildRequires: pkgconfig(cor) >= 0.1.5
 BuildRequires: pkgconfig(QtCore)
@@ -16,6 +16,20 @@ BuildRequires: contextkit-devel
 %description
 Adapter to use Contextkit API to access statefs and statefs
 provider to reuse contextkit providers
+
+%package -n statefs-qt4
+Summary: StateFS Qt4 bindings
+Group: System Environment/Libraries
+Requires: statefs >= 0.3.6
+%description -n statefs-qt4
+%{summary}
+
+%package -n statefs-qt4-devel
+Summary: StateFS Qt4 bindings development files
+Group: Development/Libraries
+Requires: statefs-qt4 = %{version}
+%description -n statefs-qt4-devel
+%{summary}
 
 %package provider
 Summary: Provider to expose contextkit providers properties
@@ -44,7 +58,7 @@ Contextkit property interface using statefs instead of contextkit
 %setup -q
 
 %build
-%cmake -DUSEQT=4
+%cmake -DUSEQT=4 -DSTATEFS_QT_VERSION=%{version}
 make %{?jobs:-j%jobs}
 
 %install
@@ -56,6 +70,15 @@ ln -sf %{_bindir}/statefs-contextkit-register %{buildroot}%{_sharedstatedir}/sta
 
 %clean
 rm -rf %{buildroot}
+
+%files -n statefs-qt4
+%defattr(-,root,root,-)
+%{_libdir}/libstatefs-qt4.so
+
+%files -n statefs-qt4-devel
+%defattr(-,root,root,-)
+%{_qt_headerdir}/statefs/qt/*.hpp
+%{_libdir}/pkgconfig/statefs-qt4.pc
 
 %files provider
 %defattr(-,root,root,-)
