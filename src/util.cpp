@@ -242,6 +242,39 @@ FileErrorNs::FileError Writer::set(const QVariant &v)
  * @brief Support for updating properties supplied through InOut
  * StateFS loader (see statefs documentation for details)
  *
+ * @class statefs::qt::InOutWriter
+ *
+ * @brief Thin wrapper used to update InOut property
+ *
+ * It updates property synchronously and does not provide any
+ * sophisticated ways to handle temporary unavailability the input
+ * property file.
+ * 
+ * @section inout_example Example: InOut supplier and consumer
+ *
+ * Configuration file:
+ *
+ * @include inout/statefs-inout-example.conf
+ *
+ * It should be registered using command like:
+ *
+ @verbatim
+ statefs register --statefs-type=inout <path-to-conf>/statefs-inout-example.conf
+ @endverbatim
+ *
+ * Supplier:
+ *
+ * @include inout/inout-writer.cpp
+ *
+ * It should be built with pkgconfig statefs-qt5 definitions.
+ *
+ * Consumer using Contextkit interfaces:
+ *
+ * @include inout/inout-reader.cpp
+ *
+ * statefs-qt5-examples.spec in the rpm dir demonstrates dependencies
+ * and proper registration
+ *
  * @{
  */
 
